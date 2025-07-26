@@ -58,15 +58,16 @@ end
 	return a number from 0 to 1.
 
 	source functions are split into keyboard/mouse functions
-	and joystick/gamepad functions. baton treats these two
-	categories slightly differently.
+	and joystick/gamepad functions and custom functions. baton
+	treats these three categories slightly differently.
 ]]
 
-local sourceFunction = {keyboardMouse = {}, joystick = {}}
+local sourceFunction = {keyboardMouse = {}, joystick = {}, custom = {}}
 
 -- checks whether a keyboard key is down or not
 function sourceFunction.keyboardMouse.key(key)
 	return love.keyboard.isDown(key) and 1 or 0
+	--return keyPress == key and 1 or 0
 end
 
 -- checks whether a keyboard key is down or not,
@@ -231,6 +232,11 @@ function Player:_getControlRawValue(control)
 			if rawValue >= 1 then
 				return 1
 			end
+		elseif sourceFunction.custom[type] then
+		  rawValue = rawValue + sourceFunction.custom[type](value)
+		  if rawValue >= 1 then
+				return 1
+			end
 		end
 	end
 	return rawValue
@@ -246,8 +252,8 @@ function Player:_updateControls()
 		control.value = control.rawValue >= self.config.deadzone and control.rawValue or 0
 		control.downPrevious = control.down
 		control.down = control.value > 0
-		control.pressed = control.down and not control.downPrevious
-		control.released = control.downPrevious and not control.down
+		control.pressed = control.down and not control.downPrevious 
+		control.released = control.downPrevious and not control.down 
 	end
 end
 
@@ -370,5 +376,19 @@ function baton.new(config)
 	player:_init(config)
 	return player
 end
+
+--[[
+  this function allows the additon of custom input types.
+  it allows the ability to use diffent input pereferies.
+  all the new pereferies are stored whithin the custom category.
+]]
+function baton.newInputType(name, func)
+  sourceFunction.custom[name] = func
+end
+
+-- those parse functions are made public so they can be used
+-- for custom input types
+baton.parseAxis = parseAxis
+baton.parseHat  = parseHat
 
 return baton
