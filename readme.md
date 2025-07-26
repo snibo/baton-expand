@@ -138,5 +138,21 @@ At any time, only the keyboard/mouse sources or the joystick sources for a playe
 
 You can call `player:getActiveDevice()` to see which input device is currently active. It will return either `'kbm'` (keyboard/mouse) or `'joy'` (joystick) (or `'none'` if no sources have been used yet). This is useful if you need to change what you display on screen based on the controls the player is using (such as instructions).
 
+### Adding custom input types
+you can add your own input types using:
+```lua
+baton.newInputType(name, input)
+```
+
+- `name` is the name of the new type.
+
+- `input` is a function in this form:
+```lua
+input = function(value)
+```
+it should always return a number between 0 and 1.
+
+  - `value` is the name of the source.
+
 ## Contributing
 Issues and pull requests are always welcome. To run the test, run `love .` in the baton folder.
