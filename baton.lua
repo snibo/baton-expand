@@ -66,8 +66,7 @@ local sourceFunction = {keyboardMouse = {}, joystick = {}, custom = {}}
 
 -- checks whether a keyboard key is down or not
 function sourceFunction.keyboardMouse.key(key)
-	return love.keyboard.isDown(key) and 1 or 0
-	--return keyPress == key and 1 or 0
+	return love.keyboard.isDown(key) and 1 or 0	
 end
 
 -- checks whether a keyboard key is down or not,
