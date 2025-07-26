@@ -131,28 +131,55 @@ released = player:released(control)
 These functions are most applicable for controls that act as buttons, such as a shoot button. That being said, they can be used for any control, which is useful if you want to, for example, use a movement control as a discrete button press to operate a menu.
 
 #### Updating the configuration
-The `controls` table, `pairs` table, `joystick`, `deadzone`, and `squareDeadzone` can all be accessed via `player.config`. Any of the values can be changed, and the player's behavior will be updated automatically. Note, however, that new controls and pairs cannot be added after the player is created, and controls and pairs should not be removed entirely (if you want to disable a control, you can set it to an empty table, removing all of its sources).
+The `controls` table, `pairs` table, `joystick`, `deadzone`, and `squareDeadzone` can all be accessed via `player.config`. Any of the values can be changed, and the player's behavior will be updated automatically. Note, however, that new controls and pairs cannot be added after the player is created, and controls and pairs should not be removed entirely (if you want to disable a control, you can set it to an empty table, removig all of its sources).
+
 
 #### Getting the active input device
 At any time, only the keyboard/mouse sources or the joystick sources for a player will be active. A device will be considered active if any of the sources for that device exceed the deadzone. The keyboard and mouse will always take precedence over the joystick.
 
 You can call `player:getActiveDevice()` to see which input device is currently active. It will return either `'kbm'` (keyboard/mouse) or `'joy'` (joystick) (or `'none'` if no sources have been used yet). This is useful if you need to change what you display on screen based on the controls the player is using (such as instructions).
 
+Note: custom input types are not tracked at all.
+
 ### Adding custom input types
 you can add your own input types using:
 ```lua
-baton.newInputType(name, input)
+baton.newInputType(name, sourceFunction)
 ```
 
-- `name` is the name of the new type.
-
-- `input` is a function in this form:
+- `name` is the name of the new type. it is used when defining controls.
+- `sourceFunction` is the function that determines the output value. It defined in this form:
+  ```lua
+  value = function(source)
+  ```
+  - `value` is the output returned by the function it must be a number between 0 and 1.
+  - `source` is the name on the right of the collumn when defining the controls.
+#### Example:
 ```lua
-input = function(value)
-```
-it should always return a number between 0 and 1.
+baton.newInputType(ui, function(source)
+  return uiIsDown(source) and 1 or 0
+end)
 
-  - `value` is the name of the source.
+local baton.new {
+  controls = {
+    back = {'key:left', 'ui:back'},
+    next = {'key:right', 'ui:next'},
+    confirm = {'key:enter', 'ui:confirm'},
+  }
+}
+```
+In this example I made an input type for the ui elements. and then made a player to handle the inputs from both the ui and the shortcuts.
+### Parsing functions
+Parsing functions are functions that help you get more information from the name of the control. There are two of them:
+```lua
+baton.parseAxis(source)
+baton.parseHat(source)
+```
+- `baton.parseAxis` splits a source definition into type and value
+  - example: `'button:a' -> 'button', 'a'`
+
+- `baton.parseHat` splits an axis value into axis and direction
+  - example: `'leftx-' -> 'leftx', '-'`
 
 ## Contributing
 Issues and pull requests are always welcome. To run the test, run `love .` in the baton folder.
